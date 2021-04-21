@@ -9,7 +9,7 @@
 // forward declarations to avoid include cycle
 class Vehicle;
 
-
+///////////////// CPPND I UPDATED /////////////////////
 // FP.3 Define a class âMessageQueueâ which has the public methods send and receive. 
 // Send should take an rvalue reference of type TrafficLightPhase whereas receive should return this type. 
 // Also, the class should define an std::dequeue called _queue, which stores objects of type TrafficLightPhase. 
@@ -31,6 +31,7 @@ std::condition_variable _cond;
     
 };
 
+///////////////// CPPND I UPDATED /////////////////////
 // FP.1 : Define a class âTrafficLightâ which is a child class of TrafficObject. 
 // The class shall have the public methods âvoid waitForGreen()â and âvoid simulate()â 
 // as well as âTrafficLightPhase getCurrentPhase()â, where TrafficLightPhase is an enum that 
@@ -56,7 +57,8 @@ private:
     // typical behaviour methods
     void cycleThroughPhases();
     TrafficLightPhase _currentPhase;
-
+    
+    ///////////////// CPPND I UPDATED /////////////////////
     // FP.4b : create a private member of type MessageQueue for messages of type TrafficLightPhase 
     // and use it within the infinite loop to push each new TrafficLightPhase into it by calling 
     // send in conjunction with move semantics.
