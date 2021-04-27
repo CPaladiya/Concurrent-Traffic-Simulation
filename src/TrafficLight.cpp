@@ -7,8 +7,7 @@
 
 template <typename T>
 T MessageQueue<T>::receive()
-{   
-    ///////////////// CPPND I UPDATED /////////////////////
+{
     // FP.5a : The method receive should use std::unique_lock<std::mutex> and _condition.wait() 
     // to wait for and receive new messages and pull them from the queue using move semantics. 
     // The received object should then be returned by the receive function. 
@@ -21,11 +20,11 @@ T MessageQueue<T>::receive()
 
 template <typename T>
 void MessageQueue<T>::send(T &&msg)
-{   
-    ///////////////// CPPND I UPDATED /////////////////////
+{
     // FP.4a : The method send should use the mechanisms std::lock_guard<std::mutex> 
     // as well as _condition.notify_one() to add a new message to the queue and afterwards send a notification.
     std::lock_guard<std::mutex> oneLock(mtx);
+  	_queue.clear();
     _queue.push_back(std::move(msg));
     _cond.notify_one();
 }
@@ -40,8 +39,7 @@ TrafficLight::TrafficLight()
 }
 
 void TrafficLight::waitForGreen() //void
-{   
-    ///////////////// CPPND I UPDATED /////////////////////
+{
     // FP.5b : add the implementation of the method waitForGreen, in which an infinite while-loop 
     // runs and repeatedly calls the receive function on the message queue. 
     // Once it receives TrafficLightPhase::green, the method returns.
@@ -58,45 +56,50 @@ TrafficLight::TrafficLightPhase TrafficLight::getCurrentPhase()
     return _currentPhase;
 }
 
-///////////////// CPPND I UPDATED /////////////////////
-void TrafficLight::setCurrentPhase() //toggling the phase btwn red and green
+void TrafficLight::TogglePhase() //toggling the phase btwn red and green
 {
     _currentPhase = (_currentPhase == TrafficLightPhase::red)? TrafficLightPhase::green : TrafficLightPhase::red;;
 }
 
 void TrafficLight::simulate()
-{   
-    ///////////////// CPPND I UPDATED /////////////////////
-    // FP.2b : Finally, the private method âcycleThroughPhasesâ should be started in a thread when the public method âsimulateâ is called. To do this, use the thread queue in the base class. 
+{
+    // FP.2b : Finally, the private method „cycleThroughPhases“ should be started in a thread when the public method „simulate“ is called. To do this, use the thread queue in the base class. 
     TrafficObject::threads.emplace_back(std::thread(&TrafficLight::cycleThroughPhases, this));
+}
+static std::random_device device;
+static std::uniform_int_distribution<int> distribution(4000,6000); //creating a dis between 1 and 6 seconds
+static std::mt19937 generator(device());
+int TrafficLight::RandomTime() //generating random time between 4 to 6 seconds
+{   
+    return distribution(generator);
 }
 
 // virtual function which is executed in a thread
 
 void TrafficLight::cycleThroughPhases()
-{   
-    ///////////////// CPPND I UPDATED /////////////////////
+{
     // FP.2a : Implement the function with an infinite loop that measures the time between two loop cycles 
     // and toggles the current phase of the traffic light between red and green and sends an update method 
     // to the message queue using move semantics. The cycle duration should be a random value between 4 and 6 seconds. 
     // Also, the while-loop should use std::this_thread::sleep_for to wait 1ms between two cycles. 
     std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
-    int timeBetweenLights = (rand() > RAND_MAX/2)? 4:6; //selectin random number between 4 and 6 seconds
+    std::chrono::high_resolution_clock::time_point t2;
+    double timeBetweenLights = TrafficLight::RandomTime(); //selectin random number between 4 and 6 seconds
 
     while(true)
     {   
         std::this_thread::sleep_for(std::chrono::milliseconds(1)); //sleeping for 1ms to reduce cpu load
         //starting the time clock!
-        std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
         //collecting the time between first measurement and now
-        auto duration = std::chrono::duration_cast<std::chrono::seconds>(t2-t1).count(); //measuring time difference in seconds
-        
+        t2 = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count(); //measuring time difference in seconds
         if(duration >= timeBetweenLights){
-            timeBetweenLights = (rand() > RAND_MAX/2)? 4:6; //resetting timebetweenlights to new random valu
-            TrafficLight::setCurrentPhase(); //toggling the current phase
+            timeBetweenLights = TrafficLight::RandomTime(); //resetting timebetweenlights to new random valu
+            TrafficLight::TogglePhase(); //toggling the current phase
             LightPhaseQ.send(std::move(TrafficLight::getCurrentPhase())); //sending a message to queue for _currentPhase update
             t1 = std::chrono::high_resolution_clock::now(); //resetting the time here to current time value
         }
 
     }
 }
+
