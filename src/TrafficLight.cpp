@@ -66,11 +66,12 @@ void TrafficLight::simulate()
     // FP.2b : Finally, the private method „cycleThroughPhases“ should be started in a thread when the public method „simulate“ is called. To do this, use the thread queue in the base class. 
     TrafficObject::threads.emplace_back(std::thread(&TrafficLight::cycleThroughPhases, this));
 }
-static std::random_device device;
-static std::uniform_int_distribution<int> distribution(4000,6000); //creating a dis between 1 and 6 seconds
-static std::mt19937 generator(device());
+
 int TrafficLight::RandomTime() //generating random time between 4 to 6 seconds
 {   
+    std::random_device device;
+    std::uniform_int_distribution<int> distribution(4000,6000); //creating a dis between 1 and 6 seconds
+    std::mt19937 generator(device());
     return distribution(generator);
 }
 
