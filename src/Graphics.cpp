@@ -67,6 +67,9 @@ void Graphics::drawTrafficObjects()
     cv::addWeighted(_images.at(1), opacity, _images.at(0), 1.0 - opacity, 0, _images.at(2));
 
     // display background and overlay image
-    cv::imshow(_windowName, _images.at(2));
+    cv::Mat ReducedImageSize;
+    cv::Size f;
+    cv::resize(_images.at(2),ReducedImageSize, cv::Size(),0.4,0.4);
+    cv::imshow(_windowName, ReducedImageSize);
     cv::waitKey(33);
 }
